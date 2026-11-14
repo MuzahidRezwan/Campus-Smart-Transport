@@ -1,0 +1,1 @@
+ALTER TABLE "transport_cards" ADD COLUMN "pay_by" date;
