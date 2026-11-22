@@ -1,0 +1,114 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: Project secret guard (tree + full history)
+        run: node devops/scripts/check-secrets.mjs --all && node devops/scripts/check-secrets.mjs --history
+      - name: gitleaks
+        uses: gitleaks/gitleaks-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  node:
+    name: Shared, API and web
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build -w @diu/shared
+      - run: npm test -w @diu/shared
+      - run: npm run typecheck -w @diu/api
+      - run: npm test -w @diu/api
+      - run: npm run build -w @diu/web
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+  postgres:
+    name: API on PostgreSQL with production roles
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          # Throwaway CI database: trust lets the password-less test roles log in.
+          POSTGRES_HOST_AUTH_METHOD: trust
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-retries 12
+    env:
+      # Each test file gets its own database with roles.sql + grants.sql applied,
+      # so a missing grant fails here instead of in production.
+      TEST_PG_URL: postgres://postgres@localhost:5432/postgres
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - run: npm run build -w @diu/shared
+      - run: npm test -w @diu/api
+
+  ml:
+    name: ML service
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend/ml
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/ml/requirements.txt
+      - run: pip install -r requirements.txt pytest pip-audit
+      - run: python -m pytest
+      - name: Audit Python dependencies
+        run: pip-audit -r requirements.txt
+
+  mobile:
+    name: Mobile app
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci --no-audit --no-fund && npm run build -w @diu/shared
+      - run: npm ci --no-audit --no-fund
+        working-directory: frontend/mobile
+      - run: npx tsc --noEmit
+        working-directory: frontend/mobile
+      - name: Bundle for Android (Metro + Hermes)
+        run: npm run bundle:android
+        working-directory: frontend/mobile
+        env:
+          EXPO_PUBLIC_API_URL: https://api.ci.invalid
