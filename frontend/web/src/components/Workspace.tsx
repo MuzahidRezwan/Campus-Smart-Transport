@@ -25,9 +25,9 @@ export function Workspace() {
   ];
   return (
     <Card>
-      <div className="tabs" role="tablist">
+      <div className="tabs" role="tablist" aria-label="Workspace sections">
         {tabs.filter((t) => t[3]).map(([id, label, n]) => (
-          <button key={id} role="tab" aria-selected={tab === id} onClick={() => setTab(id)}>{label}{n ? <span className="badge">{n}</span> : null}</button>
+          <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)}>{label}{n ? <span className="badge" aria-label={`${n} pending`}>{n}</span> : null}</button>
         ))}
       </div>
       <div className="pt-3.5">
@@ -52,7 +52,7 @@ function FeedTab() {
   if (feed.isLoading) return <Loading />;
   if (!feed.data?.length) return <p className="muted">No activity yet.</p>;
   return <div>{feed.data.map((f, i) => (
-    <div key={i} className="grid grid-cols-[110px_1fr] gap-2.5 border-b border-line py-2.5 last:border-0">
+    <div key={i} className="grid grid-cols-1 gap-1 border-b border-line py-2.5 last:border-0 sm:grid-cols-[110px_1fr] sm:gap-2.5">
       <span className="muted num text-xs">{dateTime(f.at)}</span>
       <div><Pill tone={f.kind}>{f.by}</Pill> <span className="ml-1.5">{f.text}</span></div>
     </div>
@@ -156,7 +156,7 @@ function NoticeTab() {
       <div>
         <h3 className="mb-2">Published</h3>
         {(notices.data ?? []).map((n) => (
-          <div key={n.id} className="grid grid-cols-[110px_1fr] gap-2.5 border-b border-line py-2.5 last:border-0">
+          <div key={n.id} className="grid grid-cols-1 gap-1 border-b border-line py-2.5 last:border-0 sm:grid-cols-[110px_1fr] sm:gap-2.5">
             <span className="muted text-xs">{dateTime(n.publishedAt)}</span>
             <div><b>{n.title}</b> <Pill tone="info">{n.audience === 'route' ? `Route ${n.routeName}` : n.audience}</Pill><div className="muted text-xs">{n.body}</div></div>
           </div>

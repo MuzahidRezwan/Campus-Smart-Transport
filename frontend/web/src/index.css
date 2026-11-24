@@ -87,8 +87,8 @@ table.data tr:last-child td { border-bottom: 0; }
 .bar > i { display: block; height: 100%; border-radius: 99px; background: var(--accent); }
 .bar.ok > i { background: var(--ok); } .bar.warn > i { background: var(--warn); } .bar.crit > i { background: var(--crit); }
 
-.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; }
-.tabs button { border: 0; background: transparent; padding: 10px 12px; cursor: pointer; font-weight: 700; color: var(--muted); border-bottom: 2px solid transparent; display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); overflow-x: auto; scrollbar-width: thin; }
+.tabs button { border: 0; background: transparent; padding: 10px 12px; min-height: 40px; cursor: pointer; font-weight: 700; color: var(--muted); border-bottom: 2px solid transparent; display: inline-flex; gap: 6px; align-items: center; white-space: nowrap; }
 .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
 
 .nav-link { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 8px; font-weight: 600; color: var(--ink); }
@@ -101,3 +101,13 @@ table.data tr:last-child td { border-bottom: 0; }
 .toast { background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 10px; font-weight: 700; box-shadow: var(--shadow); }
 
 .leaflet-container { border-radius: 10px; font: inherit; }
+
+@media (max-width: 640px) {
+  .card { padding: 12px; }
+  table.data th, table.data td { padding: 8px; }
+  .modal { width: calc(100% - 16px); max-height: calc(100% - 24px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
