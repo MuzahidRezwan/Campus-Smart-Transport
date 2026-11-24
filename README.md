@@ -1,6 +1,8 @@
 # DIU Smart Transport
 
 [![CI](https://github.com/MuzahidRezwan/campus-smart-transport/actions/workflows/ci.yml/badge.svg)](https://github.com/MuzahidRezwan/campus-smart-transport/actions/workflows/ci.yml)
+![Web](https://img.shields.io/badge/web-React%2019%20%2B%20Vite-1446a0)
+![Mobile](https://img.shields.io/badge/mobile-Expo%20%2B%20React%20Native-0b8f83)
 
 Bus transport for Daffodil International University: an authority dashboard, a student and faculty app, and a model that predicts how many people will ride each trip so the transport office can send the right buses at the right time, instead of sending one bus and waiting until it is full.
 
@@ -119,6 +121,7 @@ cp backend/api/.env.example backend/api/.env   # then set JWT_SECRET and DATA_EN
 npm run db:seed -w @diu/api              # DIU's 13 routes and timetable, 51 buses, fees; prints the admin password once
 npm run db:demo -w @diu/api              # optional: 940 riders with cards, payments, routines, tickets
 
+cp frontend/web/.env.example frontend/web/.env.local  # optional override for VITE_API_URL (defaults to http://localhost:4000)
 npm run dev:api                          # http://localhost:4000
 npm run dev:web                          # http://localhost:5173
 ```
@@ -132,7 +135,16 @@ python -m venv .venv && .venv/bin/pip install -r requirements.txt
 .venv/bin/uvicorn app.main:app --port 8000
 ```
 
-Mobile app: `cd frontend/mobile && npm ci && EXPO_PUBLIC_API_URL=http://<your computer's LAN IP>:4000 npx expo start`, then open it in Expo Go. To sign in from Expo Go, set `MOBILE_REDIRECT_URI` in `backend/api/.env` to the `exp://<LAN IP>:8081/--/auth` address (installed builds use `diutransport://auth`).
+Mobile app (`frontend/mobile`):
+
+```bash
+cd frontend/mobile
+npm ci
+cp .env.example .env                     # set EXPO_PUBLIC_API_URL=http://<your computer's LAN IP>:4000
+npx expo start
+```
+
+Open it in Expo Go on the same Wi-Fi network. To sign in from Expo Go, set `MOBILE_REDIRECT_URI` in `backend/api/.env` to the `exp://<LAN IP>:8081/--/auth` address (installed builds use `diutransport://auth`).
 
 **Signing in.** Transport office: ID `710215` with the password printed by `db:seed`, then scan the 2FA QR code with any authenticator app. Rider: *University sign-in*, then type any ID such as `221-15-443` on the mock university page.
 
