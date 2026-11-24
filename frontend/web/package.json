@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "@diu/shared": "0.1.0",
-    "@tanstack/react-query": "^5.80.0",
+    "@tanstack/react-query": "^5.108.2",
     "exceljs": "^4.4.0",
     "leaflet": "^1.9.4",
     "qrcode": "^1.5.4",
